@@ -6,6 +6,8 @@ const bodyParser = require("body-parser");
 
 const app = express(); // ✅ Define app
 
+const PORT = process.env.PORT || 3000;
+
 // ✅ Middleware
 app.use(express.json()); // Parse JSON bodies
 app.use(bodyParser.json());
@@ -27,6 +29,6 @@ app.use("/auth", authRoutes);
 app.use("/contact", contactRoutes);
 
 // ✅ Start Server
-app.listen(3000, () => {
-  console.log(`🚀 Server is running on port 3000`);
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
