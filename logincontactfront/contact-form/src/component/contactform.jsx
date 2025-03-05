@@ -114,7 +114,7 @@ function ContactForm() {
       console.log("Form Data:", formData);
   
       // ✅ Send form data to backend
-      const response = await fetch("https://contact-dandave2.onrender.com/submit-form", {
+      const response = await fetch("https://contact-dandave2.onrender.com/contact/submit-form", {
           method: "POST",
           headers: {
               "Content-Type": "application/json",
