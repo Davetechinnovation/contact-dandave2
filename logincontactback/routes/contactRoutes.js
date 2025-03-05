@@ -34,7 +34,7 @@ router.post("/submit-form", authenticateUser, async (req, res) => {
 
         async function getUserLocation(ip) {
             try {
-                const response = await axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=02996533e20b4d17aa01e97790a00ee3&ip=${ip}`);
+                const response = await axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=${process.env.IPGEO_API_KEY}&ip=${ip}`);
                 return response.data;
             } catch (error) {
                 console.error("Error fetching IP info:", error.message);
