@@ -38,11 +38,12 @@ router.post("/submit-form", authenticateUser, async (req, res) => {
         console.log("Detected IP Address:", ip);
 
         const agent = useragent.parse(req.headers["user-agent"]);
-        const deviceInfo = agent.os ? `${agent.toString()} (${agent.os.toString()})` : agent.toString();
+        const deviceInfo = `${agent.family} (${agent.os.family} ${agent.os.major})`;
 
         async function getUserLocation(ip) {
             try {
                 const response = await axios.get(`https://ipinfo.io/${ip}?token=${process.env.IPINFO_API_KEY}`);
+                console.log("IP Info Response:", response.data);
                 return response.data;
             } catch (error) {
                 console.error("Error fetching IP info:", error.message);
@@ -86,11 +87,11 @@ router.post("/submit-form", authenticateUser, async (req, res) => {
             📱 Device: ${deviceInfo}
             🏙 Location: ${city}, ${region}, ${country}
             📮 Postal Code: ${postal}
-            📡 ISP: ${org}
+            📡 ISP: ${org ? org : "N/A"}
             🏢 Company: ${company ? company.name : "N/A"}
             🌍 Coordinates: Latitude ${latitude}, Longitude ${longitude}
             ⏰ Timezone: ${timezone}
-            🏢 ASN: ${asn ? asn.asn : "N/A"}
+            🏢 ASN: ${asn && asn.asn ? asn.asn : "N/A"}
             📅 Date: ${new Date().toISOString()}
             ------------------------------------`
         };
