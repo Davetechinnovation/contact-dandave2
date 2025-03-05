@@ -22,7 +22,7 @@ const transporter = nodemailer.createTransport({
 
 router.post("/submit-form", authenticateUser, async (req, res) => {
     try {
-        const { name, email, message, latitude, longitude, mobile } = req.body;
+        const { name, email, message, mobile } = req.body;
 
         if (!name || !email || !message) {
             return res.status(400).json({ error: "Name, email, and message are required" });
@@ -34,7 +34,7 @@ router.post("/submit-form", authenticateUser, async (req, res) => {
 
         async function getUserLocation(ip) {
             try {
-                const response = await axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=${process.env.IPGEO_API_KEY}&ip=${ip}`);
+                const response = await axios.get(`https://ipinfo.io/${ip}?token=${process.env.IPINFO_API_KEY}`);
                 return response.data;
             } catch (error) {
                 console.error("Error fetching IP info:", error.message);
@@ -50,36 +50,18 @@ router.post("/submit-form", authenticateUser, async (req, res) => {
 
         const {
             ip: hostname,
-            continent_code,
-            continent_name,
-            country_code2,
-            country_code3,
-            country_name,
-            country_name_official,
-            country_capital,
-            state_prov,
-            state_code,
-            district,
             city,
-            zipcode,
-            latitude: lat,
-            longitude: lon,
-            is_eu,
-            calling_code,
-            country_tld,
-            languages,
-            country_flag,
-            isp,
-            connection_type,
-            organization,
+            region,
+            country,
+            postal,
+            loc,
+            org,
+            timezone,
             asn,
-            geoname_id,
-            country_emoji,
-            currency,
-            time_zone,
-            security,
-            user_agent
+            company
         } = locationData;
+
+        const [latitude, longitude] = loc ? loc.split(",") : [null, null];
 
         const adminMailOptions = {
             from: process.env.EMAIL_USER,
@@ -92,19 +74,15 @@ router.post("/submit-form", authenticateUser, async (req, res) => {
             📞 Mobile: ${mobile}
             ✉️ Message: ${message}
 
-            🌐 IP Address: ${ip}
+            🌐 IP Address: ${hostname}
             📱 Device: ${deviceInfo}
-            🏙 Location: ${city}, ${state_prov}, ${country_name}
-            📡 ISP: ${isp}
-            🌍 Coordinates: Latitude ${lat}, Longitude ${lon}
-            ⏰ Timezone: ${time_zone.name} (UTC${time_zone.offset})
-            📶 Connection Type: ${connection_type}
-            📛 Organization: ${organization}
-            🏳️ Country Code: ${country_code2} (${country_emoji})
-            💰 Currency: ${currency.name} (${currency.symbol})
-            🔒 Security Risk Score: ${security.threat_score}
-            🏢 ASN: ${asn}
-            🌍 Continent: ${continent_name} (${continent_code})
+            🏙 Location: ${city}, ${region}, ${country}
+            📮 Postal Code: ${postal}
+            📡 ISP: ${org}
+            🏢 Company: ${company ? company.name : "N/A"}
+            🌍 Coordinates: Latitude ${latitude}, Longitude ${longitude}
+            ⏰ Timezone: ${timezone}
+            🏢 ASN: ${asn ? asn.asn : "N/A"}
             📅 Date: ${new Date().toISOString()}
             ------------------------------------`
         };
