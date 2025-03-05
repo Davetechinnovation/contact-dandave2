@@ -29,7 +29,7 @@ const Auth = () => {
     setLoading(true);
   
     try {
-      const response = await fetch("https://contact-dandave.onrender.com/auth/signup", {
+      const response = await fetch("https://contact-dandave2.onrender.com/auth/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, email, password }),
@@ -65,7 +65,7 @@ const Auth = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("https://contact-dandave.onrender.com/auth/login", {
+      const response = await fetch("https://contact-dandave2.onrender.com/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ identifier, password }),
@@ -88,6 +88,8 @@ const Auth = () => {
       setLoading(false);
     }
   };
+
+  
 
   return (
     <div className="form-container">

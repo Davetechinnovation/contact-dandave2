@@ -45,7 +45,7 @@ function ContactForm() {
   const fetchUserProfile = async (token) => {
     try {
       // Send a request to the server to get the user's profile.
-      const response = await fetch("https://contact-dandave.onrender.com/auth/profile", {
+      const response = await fetch("https://contact-dandave2.onrender.com/auth/profile", {
         headers: {
           Authorization: `Bearer ${token}`, // Send the token to prove the user is logged in.
         },
@@ -114,7 +114,7 @@ function ContactForm() {
       console.log("Form Data:", formData);
   
       // ✅ Send form data to backend
-      const response = await fetch("https://contact-dandave.onrender.com/submit-form", {
+      const response = await fetch("https://contact-dandave2.onrender.com/submit-form", {
           method: "POST",
           headers: {
               "Content-Type": "application/json",
