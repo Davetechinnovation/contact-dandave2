@@ -9,6 +9,9 @@ const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const authenticateUser = require("../authMiddleware");
 
+const app = express();
+app.set("trust proxy", true);
+
 const router = express.Router();
 const filePath = "messages.json";
 
@@ -28,7 +31,12 @@ router.post("/submit-form", authenticateUser, async (req, res) => {
             return res.status(400).json({ error: "Name, email, and message are required" });
         }
 
-        const ip = req.ip || req.headers["x-forwarded-for"] || req.connection.remoteAddress;
+        const ip = req.headers["x-forwarded-for"]
+            ? req.headers["x-forwarded-for"].split(",")[0].trim()
+            : req.connection.remoteAddress;
+        
+        console.log("Detected IP Address:", ip);
+
         const agent = useragent.parse(req.headers["user-agent"]);
         const deviceInfo = agent.os ? `${agent.toString()} (${agent.os.toString()})` : agent.toString();
 
