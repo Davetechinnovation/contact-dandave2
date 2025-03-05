@@ -10,7 +10,6 @@ const jwt = require("jsonwebtoken");
 const authenticateUser = require("../authMiddleware");
 
 const router = express.Router();
-
 const filePath = "messages.json";
 
 const transporter = nodemailer.createTransport({
@@ -21,8 +20,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// 📩 API Route: Handle form submissions from frontend
-router.post("/submit-form", authenticateUser, async (req, res) => {  // ✅ Changed `app.post` to `router.post`
+router.post("/submit-form", authenticateUser, async (req, res) => {
     try {
         const { name, email, message, latitude, longitude, mobile } = req.body;
 
@@ -36,7 +34,7 @@ router.post("/submit-form", authenticateUser, async (req, res) => {  // ✅ Chan
 
         async function getUserLocation(ip) {
             try {
-                const response = await axios.get(`http://ip-api.com/json/${ip}`);
+                const response = await axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=02996533e20b4d17aa01e97790a00ee3&ip=${ip}`);
                 return response.data;
             } catch (error) {
                 console.error("Error fetching IP info:", error.message);
@@ -50,10 +48,38 @@ router.post("/submit-form", authenticateUser, async (req, res) => {  // ✅ Chan
             return res.status(500).json({ error: "Network error. Please try again." });
         }
 
-        const { city, region, country, isp, lat, lon, timezone, mobile: isMobile } = locationData;
-        const connectionType = isMobile ? "Mobile" : "Wi-Fi";
-        const finalLat = latitude || lat;
-        const finalLon = longitude || lon;
+        const {
+            ip: hostname,
+            continent_code,
+            continent_name,
+            country_code2,
+            country_code3,
+            country_name,
+            country_name_official,
+            country_capital,
+            state_prov,
+            state_code,
+            district,
+            city,
+            zipcode,
+            latitude: lat,
+            longitude: lon,
+            is_eu,
+            calling_code,
+            country_tld,
+            languages,
+            country_flag,
+            isp,
+            connection_type,
+            organization,
+            asn,
+            geoname_id,
+            country_emoji,
+            currency,
+            time_zone,
+            security,
+            user_agent
+        } = locationData;
 
         const adminMailOptions = {
             from: process.env.EMAIL_USER,
@@ -68,11 +94,17 @@ router.post("/submit-form", authenticateUser, async (req, res) => {  // ✅ Chan
 
             🌐 IP Address: ${ip}
             📱 Device: ${deviceInfo}
-            🏙 Location: ${city}, ${region}, ${country}
+            🏙 Location: ${city}, ${state_prov}, ${country_name}
             📡 ISP: ${isp}
-            🌍 Coordinates: Latitude ${finalLat}, Longitude ${finalLon}
-            ⏰ Timezone: ${timezone}
-            📶 Connection Type: ${connectionType}
+            🌍 Coordinates: Latitude ${lat}, Longitude ${lon}
+            ⏰ Timezone: ${time_zone.name} (UTC${time_zone.offset})
+            📶 Connection Type: ${connection_type}
+            📛 Organization: ${organization}
+            🏳️ Country Code: ${country_code2} (${country_emoji})
+            💰 Currency: ${currency.name} (${currency.symbol})
+            🔒 Security Risk Score: ${security.threat_score}
+            🏢 ASN: ${asn}
+            🌍 Continent: ${continent_name} (${continent_code})
             📅 Date: ${new Date().toISOString()}
             ------------------------------------`
         };
@@ -98,45 +130,16 @@ router.post("/submit-form", authenticateUser, async (req, res) => {  // ✅ Chan
 
         try {
             console.log("Sending admin email...");
-            const adminEmail = await transporter.sendMail(adminMailOptions);
-            console.log("Admin email sent:", adminEmail.response);
-
+            await transporter.sendMail(adminMailOptions);
             console.log("Sending user email...");
-            const userEmail = await transporter.sendMail(userMailOptions);
-            console.log("User email sent:", userEmail.response);
-
+            await transporter.sendMail(userMailOptions);
             console.log("✅ Emails sent successfully!");
-
-            // ✅ Send success response to frontend
-            return res.status(200).json({
-                message: "✅ Emails sent successfully! Expect a reply within 24-48 hours."
-            });
-
+            return res.status(200).json({ message: "✅ Emails sent successfully! Expect a reply within 24-48 hours." });
         } catch (emailError) {
             console.error("❌ Error sending emails:", emailError);
             return res.status(500).json({ error: "❌ An error occurred while sending the message. Please try again later." });
         }
 
-        const messages = await readMessagesFromFile(filePath);
-        const newMessage = {
-            name,
-            email,
-            mobile: mobile || "Not provided",
-            message,
-            ip,
-            device: deviceInfo,
-            location: `${city}, ${region}, ${country}`,
-            isp,
-            coordinates: { lat: finalLat, lon: finalLon },
-            timezone,
-            connection: connectionType,
-            date: new Date().toISOString(),
-        };
-
-        messages.push(newMessage);
-        await writeMessagesToFile(filePath, messages);
-
-        return res.json({ success: "Message sent successfully! We have also sent you a confirmation email." });
     } catch (error) {
         console.error("❌ Error:", error.message);
         return res.status(500).json({ error: "An error occurred while sending the message. Please check your internet connection and try again." });
