@@ -13,7 +13,7 @@ app.use(express.json()); // Parse JSON bodies
 app.use(bodyParser.json());
 app.use(
   cors({
-    origin: "https://contact-dandave.netlify.app/", // Allow requests from this origin
+    origin: "https://contact-dandave.netlify.app", // Allow requests from this origin
     credentials: true, // Allow credentials (e.g., cookies)
     methods: ["GET", "POST", "OPTIONS"], // Allow these HTTP methods
     allowedHeaders: ["Content-Type", "Authorization"], // Allow these headers
